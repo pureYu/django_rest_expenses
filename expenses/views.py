@@ -1,13 +1,25 @@
-from rest_framework import viewsets
-from rest_framework.permissions import IsAuthenticated
+from rest_framework.generics import get_object_or_404
+from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
+from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
 from .models import Cost
+from  users.models import Profile
 from .serializers import CostSerializer
 
 
-class CostViewSet(viewsets.ModelViewSet):
-    serializer_class = CostSerializer
+class CostView(ListCreateAPIView):
     queryset = Cost.objects.all()
+    serializer_class = CostSerializer
+
+    def perform_create(self, serializer):
+        author = get_object_or_404(Profile, id=self.request.data.get('author_id'))
+        return serializer.save(author=author)
+
+
+class SingleCostView(RetrieveUpdateDestroyAPIView):
+    queryset = Cost.objects.all()
+    serializer_class = CostSerializer
 
 
 # from rest_framework.generics import get_object_or_404
@@ -19,6 +31,7 @@ class CostViewSet(viewsets.ModelViewSet):
 #
 #
 # class CostView(APIView):
+#
 #     def get(self, request):
 #         costs = Cost.objects.all()
 #         serializer = CostSerializer(costs, many=True)
@@ -74,3 +87,17 @@ class CostViewSet(viewsets.ModelViewSet):
 #         user = get_object_or_404(queryset, pk=pk)
 #         serializer = CostSerializer(user)
 #         return Response(serializer.data)
+
+
+# from rest_framework import viewsets
+# from rest_framework.permissions import IsAuthenticated
+#
+# from .models import Cost
+# from .serializers import CostSerializer
+#
+#
+# class CostViewSet(viewsets.ModelViewSet):
+#     serializer_class = CostSerializer
+#     queryset = Cost.objects.all()
+
+

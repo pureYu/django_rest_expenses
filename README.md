@@ -15,9 +15,12 @@ When displayed, it goes green if the total for current day is less than expected
 otherwise goes red.
 
 Groups:
+
 regular_user (can CRUD their own records)
 user_manager (can CRUD users, except their groups)
 admin (can CRUD all records and users)
+
+And tests should be added (review DRF testing section)
 
 
 Test users:
@@ -26,4 +29,5 @@ Test users:
 admin / admin
 test123 / aYMX5Wk7Cu
 Yuliya / rM7759hw96
+user4 / EkbZxEXyAm
 ```
