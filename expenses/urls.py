@@ -4,6 +4,7 @@ from .views import CostViewSet
 
 
 router = DefaultRouter()
-router.register(r'costs', CostViewSet, basename='user')    # why 'user'????
+# router.register(r'costs', CostViewSet, basename='user')    # why 'user'????
+router.register(r'', CostViewSet, basename='user')    # why 'user'????
 
 urlpatterns = router.urls
