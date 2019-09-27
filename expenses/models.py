@@ -11,8 +11,7 @@ class Cost(models.Model):
     author = models.ForeignKey(User, on_delete=models.CASCADE)
 
     def __str__(self):
-        # return f'{self.amount} spent at {self.date_spent} on: "{self.title}"'
-        return "{}: {:.2f} spent at {:%Y-%m-%d %H:%M} on: \"{}\"".format(self.author.username, self.amount, self.date_spent, self.title)
+        return "\"{}\" - {:.2f} - {:%Y-%m-%d %H:%M} / {}".format(self.title, self.amount, self.date_spent, self.author.username )
 
     def get_absolute_url(self):
         return reverse('cost-detail', kwargs={'pk': self.pk})

@@ -1,103 +1,54 @@
 from rest_framework.generics import get_object_or_404
-from rest_framework.generics import ListCreateAPIView, RetrieveAPIView
-from rest_framework.generics import RetrieveUpdateAPIView
+from rest_framework.generics import ListCreateAPIView
 from rest_framework.generics import RetrieveUpdateDestroyAPIView
 
+from rest_framework.permissions import IsAuthenticated
+from django.contrib.auth.models import User
 from .models import Cost
-from  users.models import Profile
 from .serializers import CostSerializer
+
+from .filters import *
+from django_filters import rest_framework as filters
 
 
 class CostView(ListCreateAPIView):
+    """
+    View for listing users' expenses and CRUD their costs
+    """
+    permission_classes = (IsAuthenticated,)
     queryset = Cost.objects.all()
     serializer_class = CostSerializer
+    filter_backends = (filters.DjangoFilterBackend,)
+    filterset_class = CostFilter
+
+    def get_queryset(self):
+        # queryset = Cost.objects.filter(author=self.request.user)
+        filter = {}
+        if IsAuthenticated and self.request.user.id != 1:
+            filter['author'] = self.request.user
+        queryset = Cost.objects.filter(**filter)
+        return queryset.order_by('-date_spent', '-id')
+
+    # def get_queryset(self):
+    #     # queryset = Cost.objects.filter(author=self.request.user)
+    #     # return queryset.order_by('-date_spent', '-id')
+    #
+    #     queryset = Cost.objects.all()
+    #     filter = {}
+    #     filter_text = self.request.query_params.get('search', None)
+    #     if filter_text:
+    #         filter['title__icontains'] = filter_text
+    #     filter_date_form = self.request.query_params.get('date_from', None)
+    #     if filter_date_form:
+    #         filter['date_spent__gte'] = filter_date_form
+    #     return queryset.filter(**filter).order_by('-date_spent', '-id')
 
     def perform_create(self, serializer):
-        author = get_object_or_404(Profile, id=self.request.data.get('author_id'))
+        author = get_object_or_404(User, id=self.request.user.id)
         return serializer.save(author=author)
 
 
 class SingleCostView(RetrieveUpdateDestroyAPIView):
+    permission_classes = (IsAuthenticated,)
     queryset = Cost.objects.all()
     serializer_class = CostSerializer
-
-
-# from rest_framework.generics import get_object_or_404
-# from rest_framework.response import Response
-# from rest_framework.views import APIView
-#
-# from .models import Cost
-# from .serializers import CostSerializer
-#
-#
-# class CostView(APIView):
-#
-#     def get(self, request):
-#         costs = Cost.objects.all()
-#         serializer = CostSerializer(costs, many=True)
-#         return Response({"costs": serializer.data})
-#
-#     def post(self, request):
-#         cost = request.data.get('cost')
-#         # Create the cost from the above data
-#         serializer = CostSerializer(data=cost)
-#         if serializer.is_valid(raise_exception=True):
-#             cost_saved = serializer.save()
-#         return Response({"success": "Cost '{} / {}' created successfully".format(cost_saved.amount, cost_saved.title)})
-#
-#     def put(self, request, pk):
-#         saved_cost = get_object_or_404(Cost.objects.all(), pk=pk)
-#         data = request.data.get('cost')
-#         serializer = CostSerializer(instance=saved_cost, data=data, partial=True)
-#         if serializer.is_valid(raise_exception=True):
-#             cost_saved = serializer.save()
-#         return Response({
-#             "success": "Cost '{} / {}' updated successfully".format(cost_saved.amount, cost_saved.title)
-#         })
-#
-#     def delete(self, request, pk):
-#         # Get object with this pk
-#         cost = get_object_or_404(Cost.objects.all(), pk=pk)
-#         cost.delete()
-#         return Response({
-#             "message": "Cost with id `{}` has been deleted.".format(pk)
-#         }, status=204)
-
-
-# from django.shortcuts import get_object_or_404
-# from rest_framework import viewsets
-# from rest_framework.response import Response
-#
-# from .models import Cost
-# from .serializers import CostSerializer
-#
-#
-# class CostView(viewsets.ViewSet):
-#     """
-#     A simple ViewSet that for listing or retrieving users.
-#     """
-#
-#     def list(self, request):
-#         queryset = Cost.objects.all()
-#         serializer = CostSerializer(queryset, many=True)
-#         return Response(serializer.data)
-#
-#     def retrieve(self, request, pk=None):
-#         queryset = Cost.objects.all()
-#         user = get_object_or_404(queryset, pk=pk)
-#         serializer = CostSerializer(user)
-#         return Response(serializer.data)
-
-
-# from rest_framework import viewsets
-# from rest_framework.permissions import IsAuthenticated
-#
-# from .models import Cost
-# from .serializers import CostSerializer
-#
-#
-# class CostViewSet(viewsets.ModelViewSet):
-#     serializer_class = CostSerializer
-#     queryset = Cost.objects.all()
-
-

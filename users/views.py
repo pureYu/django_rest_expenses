@@ -1,53 +1,49 @@
 from rest_framework.generics import get_object_or_404
+from rest_framework.generics import ListCreateAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
+
 from rest_framework.permissions import IsAuthenticated
-from rest_framework import generics, status
 from rest_framework.response import Response
-from rest_framework.views import APIView
+from django.contrib.auth.models import User
 
 from .models import Profile
-from  expenses.models import Cost
 from .serializers import ProfileSerializer
 
 
-class ProfileListCreateView(generics.ListCreateAPIView):
+class ProfileView(ListCreateAPIView):
+    """
+    View for listing users and CRUD them
+    """
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated,)
+
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        profile = Profile.objects.get(user_id=request.user.id)
+        serializer = ProfileSerializer(profile, data=data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+        else:
+            print(serializer.errors)
+        # return JsonResponse(serializer.data, safe=False)
+        # return HttpResponse(serializer.data, safe=False)
+        #
+        # return Response({"status": "ok"})
+        return Response(serializer.data)
 
     # def perform_create(self, serializer):
     #     serializer.save(user=self.request.user)
 
-
-class ProfileFilterView(APIView):
-    pass
-    # def get(self, request, region):
-    #     users = Profile.objects.filter(city=region) | Profile.objects.filter(country=region)
-    #     return Response({"users": users}, status=status.HTTP_200_OK)
-
-
-class ProfileExistsView(APIView):
-    permission_classes = (IsAuthenticated,)
-
-    def get(self, request):
-        try:
-            profile = Profile.objects.get(user=request.user)
-            return Response({"result": True, "id": profile.id})
-        except Profile.DoesNotExist:
-            return Response({"result": False})
+    # def post(self, request, format=None):
+    #     serializer = ProfileSerializer(data=request.data)
+    #     if serializer.is_valid():
+    #         serializer.save()
+    #         return Response(serializer.data, status=status.HTTP_201_CREATED)
+    #     return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
 
-class ProfileEditDeleteRetrieveView(generics.RetrieveAPIView, generics.UpdateAPIView, generics.DestroyAPIView):
+class SingleProfileView(RetrieveUpdateDestroyAPIView):
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (IsAuthenticated,)
-
-
-# from django.shortcuts import render
-# from allauth.socialaccount.providers.facebook.views import FacebookOAuth2Adapter
-# from rest_auth.registration.views import SocialLoginView
-#
-#
-# class FacebookLogin(SocialLoginView):
-#     adapter_class = FacebookOAuth2Adapter
-#
-
