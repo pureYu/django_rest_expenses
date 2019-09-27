@@ -10,7 +10,7 @@ pyasn1==0.1.9
 Pygments==2.1
 pyOpenSSL==0.15.1
 python-apt==1.1.0b1+ubuntu0.16.4.5
-requests==2.9.1
+requests==2.20.0
 six==1.10.0
 unity-lens-photos==1.0
 urllib3==1.13.1
